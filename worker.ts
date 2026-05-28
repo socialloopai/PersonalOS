@@ -118,35 +118,253 @@ const esc = (s: any): string =>
 const fmtUSD = (n: number) => new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(n)
 
 const CSS = `
-:root { --bg:#0a0a0a; --fg:#e5e5e5; --mute:#737373; --line:#1f1f1f; --accent:#f59e0b; }
-* { box-sizing: border-box; }
-body { background: var(--bg); color: var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; margin: 0; line-height: 1.5; }
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
-header { border-bottom: 1px solid var(--line); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-nav a { margin-right: 1.25rem; color: var(--fg); font-size: 0.9rem; }
-nav a.active { color: var(--accent); }
-main { max-width: 1100px; margin: 0 auto; padding: 2rem; }
-h1 { margin: 0 0 1.5rem; font-weight: 500; font-size: 1.5rem; }
-h2 { margin: 2rem 0 0.75rem; font-weight: 500; font-size: 1.1rem; color: var(--mute); text-transform: uppercase; letter-spacing: 0.05em; }
-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-th, td { text-align: left; padding: 0.65rem 0.5rem; border-bottom: 1px solid var(--line); }
-th { color: var(--mute); font-weight: 500; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+:root {
+    --bg: #fdfdfd;
+    --fg: #111111;
+    --mute: #8e8e8e;
+    --line: #e8e8e8;
+    --field: #f4f4f4;
+    --accent: #c2410c;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); }
+body {
+    color: var(--fg);
+    font-family: 'Helvetica Neue', Helvetica, -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color .15s ease;
+}
+a:hover { text-decoration-color: var(--fg); }
+code { font-family: 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace; font-size: 0.85em; color: var(--mute); }
+strong { font-weight: 600; }
+
+.demo-banner {
+    background: var(--field);
+    color: var(--fg);
+    border-bottom: 1px solid var(--line);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.7rem 3rem;
+    text-align: left;
+}
+.demo-banner a { text-decoration-color: var(--fg); }
+
+header {
+    display: grid;
+    grid-template-columns: minmax(180px, auto) 1fr auto;
+    align-items: baseline;
+    column-gap: 3rem;
+    padding: 2.5rem 3rem 1.5rem;
+    border-bottom: 1px solid var(--line);
+}
+header strong {
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+}
+nav { display: flex; flex-wrap: wrap; gap: 0.6rem 1.75rem; }
+nav a {
+    text-decoration: none;
+    color: var(--mute);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding-bottom: 3px;
+    border-bottom: 1px solid transparent;
+}
+nav a:hover { color: var(--fg); }
+nav a.active { color: var(--fg); border-bottom-color: var(--fg); }
+header > div:last-child {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    color: var(--mute);
+    text-align: right;
+}
+header > div:last-child a { text-decoration-color: var(--fg); }
+
+main {
+    padding: 4.5rem 3rem 6rem;
+    max-width: 1240px;
+}
+
+h1 {
+    font-weight: 700;
+    font-size: 3rem;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin: 0 0 3.5rem;
+}
+h2 {
+    font-weight: 500;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin: 4rem 0 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+}
+
+p { margin: 0 0 1rem; }
+p:last-child { margin-bottom: 0; }
 .muted { color: var(--mute); }
-.amount-out { color: #ef4444; }
-.amount-in  { color: #10b981; }
-.card { border: 1px solid var(--line); border-radius: 6px; padding: 1.25rem; margin-bottom: 1rem; }
-.kpi { font-size: 2rem; font-weight: 500; }
-.kpi-label { color: var(--mute); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
-.grid { display: grid; gap: 1rem; }
+.err { color: var(--accent); font-size: 0.8rem; letter-spacing: 0.04em; margin: 0.75rem 0; }
+.accent { color: var(--accent); }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    margin-top: 0.5rem;
+}
+thead th {
+    text-align: left;
+    padding: 0.5rem 1.25rem 0.65rem 0;
+    font-weight: 500;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--mute);
+    border-bottom: 1px solid var(--fg);
+    vertical-align: bottom;
+    white-space: nowrap;
+}
+td {
+    padding: 0.95rem 1.25rem 0.95rem 0;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+}
+td:last-child, th:last-child { padding-right: 0; }
+.amount-out, .amount-in { font-variant-numeric: tabular-nums; color: var(--fg); }
+
+.card {
+    padding: 1.75rem 0;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+}
+.card:last-child { border-bottom: 0; }
+.grid > .card { border-bottom: 1px solid var(--line); }
+.grid > .card:last-child { border-bottom: 1px solid var(--line); }
+
+.kpi {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+.kpi-label {
+    color: var(--mute);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin-bottom: 0.9rem;
+    font-weight: 500;
+}
+
+.grid { display: grid; gap: 0 3rem; }
 .grid-2 { grid-template-columns: repeat(2, 1fr); }
 .grid-3 { grid-template-columns: repeat(3, 1fr); }
-form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 360px; }
-input, textarea, select { background: #161616; border: 1px solid var(--line); color: var(--fg); padding: 0.6rem 0.75rem; border-radius: 4px; font: inherit; }
-button { background: var(--accent); color: #000; border: 0; padding: 0.65rem 1rem; border-radius: 4px; font: inherit; font-weight: 500; cursor: pointer; }
-button.ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
-.err { color: #ef4444; margin: 0.5rem 0; font-size: 0.9rem; }
-pre { background: #161616; padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.85rem; }
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-width: 460px;
+    margin-top: 1rem;
+}
+input, textarea, select {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    color: var(--fg);
+    padding: 0.6rem 0;
+    font: inherit;
+    font-size: 0.9rem;
+    border-radius: 0;
+    outline: none;
+    transition: border-color .15s ease;
+    appearance: none;
+    -webkit-appearance: none;
+}
+textarea { resize: vertical; min-height: 3.5rem; }
+input:focus, textarea:focus, select:focus { border-bottom-color: var(--fg); }
+input::placeholder, textarea::placeholder { color: var(--mute); }
+input[type="file"] { padding: 0.45rem 0; font-size: 0.8rem; color: var(--mute); }
+select {
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+                      linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 12px) 55%, calc(100% - 7px) 55%;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 1.5rem;
+    color: var(--fg);
+    cursor: pointer;
+}
+
+button {
+    background: var(--fg);
+    color: var(--bg);
+    border: 0;
+    padding: 0.95rem 2rem;
+    font: inherit;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 0;
+    align-self: flex-start;
+    transition: background .15s ease;
+}
+button:hover { background: #2b2b2b; }
+button:disabled {
+    background: transparent;
+    color: var(--mute);
+    cursor: default;
+    border: 1px solid var(--line);
+    padding: 0.85rem 1.85rem;
+}
+button.ghost {
+    background: transparent;
+    color: var(--mute);
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+}
+button.ghost:hover { color: var(--fg); background: transparent; }
+
+pre { background: var(--field); padding: 1rem; font-size: 0.8rem; overflow-x: auto; border-radius: 0; }
+
+@media (max-width: 860px) {
+    header {
+        grid-template-columns: 1fr;
+        padding: 1.5rem 1.5rem 1rem;
+        row-gap: 0.85rem;
+    }
+    header > div:last-child { text-align: left; }
+    main { padding: 2.5rem 1.5rem 4rem; }
+    h1 { font-size: 2.25rem; margin-bottom: 2.5rem; }
+    h2 { margin-top: 2.5rem; }
+    .demo-banner { padding: 0.65rem 1.5rem; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .grid { gap: 0; }
+    .grid > .card { padding: 1.25rem 0; }
+}
 `
 
 function layout(opts: {title: string; user: User | null; path: string; body: string; demoMode?: boolean}): string {
@@ -156,14 +374,14 @@ function layout(opts: {title: string; user: User | null; path: string; body: str
         ? `${navItem('/', 'Home')}${navItem('/tasks', 'Tasks')}${navItem('/finance', 'Finance')}${navItem('/legal', 'Legal')}${navItem('/taxes', 'Taxes')}${navItem('/entities', 'Entities')}${navItem('/healthtab', 'Health')}${navItem('/reflections', 'Reflections')}${navItem('/soul', 'Soul')}${navItem('/ask', 'Ask')}${navItem('/profile', 'Profile')}`
         : ''
     const userBox = opts.demoMode
-        ? `<span class="muted">demo · everyone shares this data</span>`
+        ? `Demo — shared account`
         : opts.user
-            ? `<span class="muted">${esc(opts.user.name || opts.user.username)}</span>&nbsp;&middot;&nbsp;<a href="/auth/logout" onclick="event.preventDefault();document.getElementById('logout-form').submit();">Sign out</a><form id="logout-form" method="post" action="/auth/logout" style="display:none"></form>`
+            ? `${esc(opts.user.name || opts.user.username)} &nbsp;·&nbsp; <a href="/auth/logout" onclick="event.preventDefault();document.getElementById('logout-form').submit();">Sign out</a><form id="logout-form" method="post" action="/auth/logout" style="display:none"></form>`
             : `<a href="/auth/sign-in">Sign in</a>`
     const banner = opts.demoMode
-        ? `<div style="background:#1f1f1f;color:#f59e0b;padding:0.5rem 2rem;font-size:0.85rem;text-align:center;border-bottom:1px solid #1f1f1f">Public demo · all visitors share the same account · <a href="https://blitz.dev/fork/personal-os" style="color:#f59e0b;text-decoration:underline">fork to get your own</a></div>`
+        ? `<div class="demo-banner">Public demo — all visitors share the same account — <a href="https://blitz.dev/fork/personal-os">fork to get your own</a></div>`
         : ''
-    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(opts.title)} · Personal OS</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>${CSS}</style></head><body>${banner}<header><div><strong>Personal OS</strong> &nbsp;<nav style="display:inline">${nav}</nav></div><div>${userBox}</div></header><main>${opts.body}</main></body></html>`
+    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(opts.title)} · Personal OS</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>${CSS}</style></head><body>${banner}<header><strong>Personal OS</strong><nav>${nav}</nav><div>${userBox}</div></header><main>${opts.body}</main></body></html>`
 }
 
 const signInPage = (err?: string) => layout({
@@ -195,10 +413,10 @@ ${err ? `<p class="err">${esc(err)}</p>` : ''}
 
 // ────────────────────────────── app + routes ─────────────────────────────
 const app = teenyHono<Env>(async (c) => {
-    // Pass D1 + R2 bindings directly — blitz's runtime exposes them as RPC stubs
-    // which the older D1Adapter wrapper rejects. Local wrangler still works the
-    // same way; D1Adapter is only needed in non-Workers contexts.
-    const $db = new $Database(c, config, db(c), bucket(c))
+    // Blitz hosted runtime: pass raw c.env.TEENY_PRIMARY_DB to $Database (it knows how to
+    // talk to the adapter). The db(c) D1-like wrapper is only used for direct prepare/bind
+    // queries in route handlers below. Local wrangler still works via PRIMARY_DB.
+    const $db = new $Database(c, config, (c.env.TEENY_PRIMARY_DB || c.env.PRIMARY_DB) as any, (c.env.TEENY_PRIMARY_R2 || c.env.PRIMARY_BUCKET) as any)
     $db.extensions.push(new OpenApiExtension($db, true))
     $db.extensions.push(new PocketUIExtension($db))
     return $db
@@ -692,8 +910,8 @@ app.get('/soul', async (c) => {
                 <span>Streak <strong style="color:var(--accent)">${s.streak || 0}</strong></span>
                 <span class="muted">Best ${s.best_streak || 0}</span>
             </div>
-            <form method="post" action="/soul/${s.id}/checkin" style="margin-top:0.75rem;max-width:none">
-                <button type="submit" ${s.done_today ? 'disabled' : ''} style="${s.done_today ? 'background:#10b981;color:#fff' : ''}">${s.done_today ? 'Done today ✓' : 'Mark today done'}</button>
+            <form method="post" action="/soul/${s.id}/checkin" style="margin-top:1rem;max-width:none">
+                <button type="submit" ${s.done_today ? 'disabled' : ''}>${s.done_today ? 'Logged today' : 'Mark today done'}</button>
             </form>
         </div>`).join('')}</div>`
 
@@ -769,7 +987,7 @@ app.get('/finance', async (c) => {
 
     const uploadParam = c.req.query('upload')
     const uploadBanner = uploadParam === 'ok'
-        ? '<p style="color:#10b981">Statement uploaded. Run the statement-importer skill to parse it into transactions.</p>'
+        ? '<p class="muted" style="font-size:0.8rem;letter-spacing:0.04em">Statement uploaded — run the statement-importer skill to parse it into transactions.</p>'
         : uploadParam === 'missing' ? '<p class="err">No file selected.</p>'
         : uploadParam === 'not_pdf' ? '<p class="err">Only PDF files supported.</p>' : ''
 
@@ -817,7 +1035,7 @@ app.get('/finance', async (c) => {
 
     const stmtSummary = Object.keys(stmtCounts).length === 0
         ? '<p class="muted">No statements uploaded yet.</p>'
-        : `<p class="muted">${(stmtCounts.pending || 0)} pending, ${(stmtCounts.completed || 0)} completed${stmtCounts.failed ? `, <span style="color:#ef4444">${stmtCounts.failed} failed</span>` : ''}.</p>`
+        : `<p class="muted">${(stmtCounts.pending || 0)} pending, ${(stmtCounts.completed || 0)} completed${stmtCounts.failed ? `, <span class="accent">${stmtCounts.failed} failed</span>` : ''}.</p>`
 
     const uploadForm = `<form method="post" action="/documents/upload" enctype="multipart/form-data" style="flex-direction:row;align-items:center;gap:0.75rem;max-width:none">
         <input type="file" name="file" accept=".pdf" required style="flex:1">
@@ -1002,7 +1220,7 @@ app.get('/profile', async (c) => {
                 <p>Phone: ${esc(me?.phone || '—')}</p>
                 <p>Citizenship: ${esc(me?.citizenship || '—')}</p>
                 <p>Location: ${esc([me?.city, me?.state].filter(Boolean).join(', ') || '—')}</p>
-                <p>Oura PAT: ${me?.oura_access_token ? '<span style="color:#10b981">configured</span>' : '<span class="muted">not set</span>'}</p>
+                <p>Oura PAT: ${me?.oura_access_token ? 'configured' : '<span class="muted">not set</span>'}</p>
             </div>
             <p class="muted">Profile editing UI is on the v1.1 roadmap. For now edit via PocketUI at <a href="/api/v1/pocket/">/api/v1/pocket/</a>.</p>`,
     }))
@@ -1053,3 +1271,4 @@ export default {
         }
     },
 }
+
