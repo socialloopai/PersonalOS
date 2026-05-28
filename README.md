@@ -52,4 +52,6 @@ The original shipped 7 skills (add-project, add-task, add-habit, snapshot, debri
 
 See `skills/TEENYBASE-API.md` for the auth + query cheat sheet.
 
+## License
+
 [MIT](./LICENSE)
