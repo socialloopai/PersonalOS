@@ -19,15 +19,16 @@ npx teeny generate --local && npx teeny deploy --local --yes
 npx teeny dev --local
 ```
 
-**Blitz.dev project on Cloudflare** (persistent on the cloud accessible from your phone)
-
-Blitz is just Cloudflare, but provisions a ready-made backend for you so you do zero manual setup. Each Blitz project packages a Cloudflare Worker, SQLite database (D1), file storage (R2), and a live `<slug>.app.blitz.dev` URL into a backend framework optimized for agent use. Free to claim with a Google login.
+**Claude gets it running on Cloudflare** (persistent on the cloud accessible from your phone)
 
 Paste into Claude Code:
 
 ```
 Install the blitz skill (`npx -y @blitzdev/skill install`), clone github.com/socialloopai/PersonalOS and deploy it to a new Blitz project running on Cloudflare.
 ```
+
+Blitz is just Cloudflare, but provisions a ready-made backend for you so you do zero manual setup. Each Blitz project packages a Cloudflare Worker, SQLite database (D1), file storage (R2), and a live `<slug>.app.blitz.dev` URL into a backend framework optimized for agent use. Free to claim with a Google login.
+
 
 **Self-hosted on Cloudflare**
 
