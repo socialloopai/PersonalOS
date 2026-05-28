@@ -4,7 +4,7 @@ PersonalOS keeps everything you'd otherwise lose track of in one database: bank 
 
 Live demo at **https://personal-os.app.blitz.dev**. No signup, you land on Alex's seeded dashboard: 2 projects, 7 transactions, an I-140 case, two LLCs, an Oura day, a coffee habit on a 3-day streak. Try `/ask?q=coffee`.
 
-This is a port of [socialloopai/PersonalOS](https://github.com/socialloopai/PersonalOS) from Supabase to [teenybase](https://github.com/teenybase/teenybase) (the open-source framework Blitz runs on). Same shape of OS, same Claude skills, runs anywhere teenybase runs.
+Built on [teenybase](https://github.com/teenybase/teenybase), the open-source framework Blitz runs on. Schema and access rules in one TypeScript config, auth + REST API + R2 storage generated from that. Runs anywhere teenybase runs.
 
 ## Fork to get your own
 
@@ -61,6 +61,6 @@ Pre-alpha. JWT signature verification is stubbed for tier-1 local (decodes paylo
 
 ## Credits
 
-Original [PersonalOS](https://github.com/socialloopai/PersonalOS) by [@socialloopai](https://github.com/socialloopai). I ported the backend so anyone can run a copy in a minute without spinning up a Supabase project. Honestly the seed flow is the only reason I sat down to do this.
+Original [PersonalOS](https://github.com/socialloopai/PersonalOS) by [@socialloopai](https://github.com/socialloopai). I ported the backend so anyone can spin up a copy on Cloudflare in under a minute. Honestly the seed flow is the only reason I sat down to do this.
 
 [MIT](./LICENSE)
