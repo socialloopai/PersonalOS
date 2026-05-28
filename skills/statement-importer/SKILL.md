@@ -105,11 +105,11 @@ ORDER BY tx_count DESC;
 6. Deduplication via MD5 hash of `doc_id + date + amount + description` stored in `plaid_transaction_id` (unique column)
 7. The `documents` row is updated with `processing_status` and counts (`processing_found_count`, `processing_inserted_count`, `processing_skipped_count`)
 
-## Notes vs the Supabase original
+## Notes on the data model
 
-- `statement_processing_jobs` table collapsed into `documents` (processing_status, processing_found_count, etc.)
-- Storage moved from Supabase Storage bucket `statements` to teenybase R2 file field on `documents`
-- All queries via teenybase REST instead of PostgREST. Query syntax differs (`?where=field == 'val'` instead of `?field=eq.val`)
+- `statement_processing_jobs` table is folded into `documents` (processing_status, processing_found_count, etc.)
+- PDF storage is an R2 file field on `documents`
+- Queries go through teenybase REST. Query syntax is `?where=field == 'val'`
 - Owner scoping is mandatory (multi-user ready); the script derives owner_id from the JWT
 
 ## Setup
