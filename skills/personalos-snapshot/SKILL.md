@@ -22,8 +22,8 @@ Before scoring, if you haven't already, read `~/.claude/projects/PersonalOS/memo
 ## The six domains (daily snapshot)
 
 1. **Sleep** — Oura readiness (Be) × Oura sleep score (Do)
-2. **Body** — body-fat proximity to 11% target (Be) × workout/abs/check-in execution (Do)
-3. **Food** — protein ratio of intake (Be) × protein grams vs 180g target (Do)
+2. **Body** — body-fat proximity to your target (Be) × workout/abs/check-in execution (Do). Set `BODY_FAT_TARGET` in your config; default 15%.
+3. **Food** — protein ratio of intake (Be) × protein grams vs your target (Do). Set `PROTEIN_G_TARGET` in your config; default 150g.
 4. **Money** — yesterday's income (Be) × today's income (Do). Frame: *make more money every single day.*
 5. **Tasks** — planning quality from reflection (Be) × impact-weighted task closures (Do). Tasks always belong to projects, so Tasks.Do is the daily lens on project execution: every task closed today contributes its impact, regardless of which project it lives under. Projects as standalone entities have their own weekly arc (velocity, momentum, flourishing) — the daily snapshot sees projects *through* their tasks.
 6. **Reflection** — depth/honesty of self-examination (Be) × substance of the reflection act itself (Do). This domain is weighted 2× in the aggregate because it is where `Be ≡ Do` holds most literally.
@@ -133,7 +133,7 @@ These formulas must match the frontend exactly.
 - abs_points = 2 if any workout row has workout_type containing "abs" or "core"
 - checkin_points = 2 if daily_checkin row exists today
 
-**Food.Do** = `round(min(protein_g / 180, 1) * 10)` summed over today's nutrition_log.
+**Food.Do** = `round(min(protein_g / PROTEIN_G_TARGET, 1) * 10)` summed over today's nutrition_log.
 
 **Money.Do** = income score for today. Income = transactions with `amount < 0` AND `ai_category` not containing "transfer". Sum `abs(amount)`. Score = `round(min(10, total / 100))`.
 
@@ -290,7 +290,7 @@ ON CONFLICT (date) DO UPDATE SET
 {
   "sleep":      {"be": 7, "do": 8, "become": 56, "detail": "Oura readiness 72, sleep 78", "observation": "..."},
   "body":       {"be": 4, "do": 0, "become": 0,  "detail": "BF 14%, no workout", "observation": "..."},
-  "food":       {"be": 6, "do": 7, "become": 42, "detail": "protein 130g / 180g", "observation": "..."},
+  "food":       {"be": 6, "do": 7, "become": 42, "detail": "protein 130g / target", "observation": "..."},
   "money":      {"be": 3, "do": 5, "become": 15, "detail": "yesterday $300 → today $500", "observation": "..."},
   "tasks":      {"be": 6, "do": 4, "become": 24, "detail": "2.0 impact shipped", "observation": "..."},
   "reflection": {"be": 7, "do": 6, "become": 42, "detail": "concatenated 2 entries, 1200 words", "observation": "..."}
@@ -329,7 +329,7 @@ Aggregate: Be 5.2 · Do 4.8 → Become 25.0 (grind day)
 
 Sleep        Be 7 × Do 8 →  56   Oura readiness 72, sleep 78
 Body         Be 4 × Do 0 →   0   no workout logged
-Food         Be 6 × Do 7 →  42   protein 130/180g
+Food         Be 6 × Do 7 →  42   protein 130g vs target
 Money        Be 3 × Do 5 →  15   yesterday $300 → today $500
 Tasks        Be 6 × Do 4 →  24   2.0 impact shipped
 Reflection*  Be 7 × Do 6 →  42   (* 2× weight)
