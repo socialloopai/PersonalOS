@@ -41,11 +41,17 @@ Open `config.js` and fill in your Supabase URL and anon key (from Supabase → S
 
 ### 2. Set up Supabase
 
-Create a new Supabase project. The app expects tables like `projects`, `tasks`, `legal_cases`, `transactions`, `apple_health_daily`, `oura_daily`, `reflections`, `snapshots`, `soul_items`, `tax_documents`, `tax_year_notes`, `profile`, `plaid_items`, etc.
+Create a new Supabase project, then apply the schema and create the storage buckets. Full instructions live in [`supabase/README.md`](./supabase/README.md). The short version:
 
-A schema dump is **not yet included** in this repo. The fastest way to bootstrap right now is to open `index.html`, watch the network requests fail, and create the tables Supabase tells you it's missing. Contributions of a clean `schema.sql` are very welcome (see [Contributing](#contributing)).
+```bash
+psql "$YOUR_SUPABASE_DB_URL" -f supabase/schema.sql
+# Then in the dashboard → Storage, create buckets:
+#   identity-docs, statements, tax-docs, entity-docs
+```
 
-**⚠️ CRITICAL:** Before going to production, enable Row Level Security (RLS) on every table. The anon key in `config.js` ships to the browser — without RLS, anyone with that key can read and write your entire database.
+If you want bank-account sync, deploy the Plaid edge function (see `supabase/functions/plaid-sync/`). It's a skeleton — fill in your Plaid credentials and the `/transactions/sync` call. If you skip Plaid, the statement-importer flow handles transactions manually from PDFs.
+
+**⚠️ Security model.** The schema turns on RLS but uses *permissive* policies (anon can read/write everything) — that's PersonalOS's single-user design. Your security is "keep your Supabase URL and anon key private." If you ever publish `config.js`, anyone with it can read your data. To run multi-user, add Supabase Auth + `owner_id` columns + `auth.uid()` policies. See `supabase/README.md` for details.
 
 ### 3. Serve the file
 
@@ -101,10 +107,12 @@ If you wire up Plaid, the Supabase edge function `plaid-sync` holds your Plaid `
 
 ## Contributing
 
-This started as one person's personal OS and is now open for forks. Two contributions especially welcome:
+This started as one person's personal OS and is now open for forks. Contributions especially welcome:
 
-1. **`schema.sql`** — a clean Postgres schema dump so adopters can `psql < schema.sql` and go.
-2. **Optional features as togglable modules.** Some tabs (Legal, Taxes, Soul) are deeply personal in shape — make them feel optional, not load-bearing.
+1. **Schema corrections.** `supabase/schema.sql` was reverse-engineered from app queries — column types and lengths are best guesses. If you spot mismatches against real usage, PRs welcome.
+2. **A `plaid-sync` implementation.** The current edge function is a skeleton. A working `/transactions/sync` + cursor + webhook handler would unlock the Finance tab for everyone.
+3. **Multi-user mode.** Add Supabase Auth, `owner_id` columns, and tight RLS policies. Non-trivial but the cleanest path off "URL secrecy as security."
+4. **Optional features as togglable modules.** Some tabs (Legal, Taxes, Soul) are deeply personal in shape — make them feel optional, not load-bearing.
 
 PRs: keep the single-file philosophy (no build step, no framework). If a change requires a bundler, it's probably a fork, not a PR.
 
