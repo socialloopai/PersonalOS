@@ -8,8 +8,6 @@ Live demo at **https://personal-os.app.blitz.dev**.
 
 ## Fork to make your own
 
-Three options.
-
 **Local** (private, nothing leaves your laptop)
 
 ```bash
@@ -19,7 +17,7 @@ npx teeny generate --local && npx teeny deploy --local --yes
 npx teeny dev --local
 ```
 
-**Claude gets it running on Cloudflare** (persistent on the cloud accessible from your phone)
+**Claude sets it up on Cloudflare** (persistent on the cloud accessible from your phone)
 
 Paste into Claude Code:
 
@@ -27,7 +25,7 @@ Paste into Claude Code:
 Clone github.com/socialloopai/PersonalOS and deploy it to a new Blitz project running on Cloudflare. Install the blitz skill (`npx -y @blitzdev/skill install`) and use it first. 
 ```
 
-Blitz is just Cloudflare, but provisions a ready-made backend for you so you do zero manual setup. Each Blitz project packages a Cloudflare Worker, SQLite database (D1), file storage (R2), and a live `<slug>.app.blitz.dev` URL into a backend framework optimized for agent use. Free to claim with a Google login.
+Blitz is an infracturcture service lets Claude Code provisions a ready-made backend on Cloudflare so you do zero manual setup. Each Blitz project packages a Cloudflare Worker, SQLite database (D1), file storage (R2), and a live `<slug>.app.blitz.dev` URL. Claude uses Blitz to work on your personalOS immediately instead of doing any infrastructure setup. 
 
 
 **Self-hosted on Cloudflare**
@@ -41,8 +39,6 @@ npx teeny deploy --remote --yes
 ## What's in it
 
 11 tabs: Home (projects with Be scores), Tasks, Finance, Legal, Taxes, Entities, Health, Reflections, Soul (habits), Ask, Profile. All CRUD via plain HTML forms, no JS framework. The only client-side script is Plaid Link.
-
-Schema is 25 tables in `modules/` plus three SQLite triggers preserving the BECOME core (`tasks_be_recompute_*`). Schema lives in `teenybase.ts`, migrations are auto-diffed by `teeny generate`.
 
 ## Integrations
 
