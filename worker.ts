@@ -24,6 +24,11 @@ type Env = $Env & {
         PRIMARY_BUCKET?: R2Bucket
         TEENY_PRIMARY_DB?: D1Database
         TEENY_PRIMARY_R2?: R2Bucket
+        // Public-demo mode: when set, every request is silently authenticated
+        // as this user. Used on personal-os.app.blitz.dev so visitors don't
+        // have to sign up. Forkers DO NOT inherit this — they set it (or not)
+        // on their own deployment.
+        DEMO_USER_ID?: string
     }
 }
 
@@ -86,6 +91,14 @@ function decodeJwtPayload(token: string): any | null {
 }
 
 async function getCurrentUser(c: Context<Env>): Promise<User | null> {
+    // Demo mode short-circuit: every visitor is the seeded demo user.
+    if (c.env.DEMO_USER_ID) {
+        const demo = await db(c)
+            .prepare(`SELECT id, username, email, name FROM users WHERE id = ?`)
+            .bind(c.env.DEMO_USER_ID)
+            .first<User>()
+        if (demo) return demo
+    }
     const cookie = getCookie(c, 'personal_os_auth')
     if (!cookie) return null
     const payload = decodeJwtPayload(cookie)
@@ -136,16 +149,21 @@ button.ghost { background: transparent; color: var(--fg); border: 1px solid var(
 pre { background: #161616; padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.85rem; }
 `
 
-function layout(opts: {title: string; user: User | null; path: string; body: string}): string {
+function layout(opts: {title: string; user: User | null; path: string; body: string; demoMode?: boolean}): string {
     const navItem = (href: string, label: string) =>
         `<a href="${href}" ${opts.path === href ? 'class="active"' : ''}>${label}</a>`
     const nav = opts.user
         ? `${navItem('/', 'Home')}${navItem('/tasks', 'Tasks')}${navItem('/finance', 'Finance')}${navItem('/legal', 'Legal')}${navItem('/taxes', 'Taxes')}${navItem('/entities', 'Entities')}${navItem('/healthtab', 'Health')}${navItem('/reflections', 'Reflections')}${navItem('/soul', 'Soul')}${navItem('/ask', 'Ask')}${navItem('/profile', 'Profile')}`
         : ''
-    const userBox = opts.user
-        ? `<span class="muted">${esc(opts.user.name || opts.user.username)}</span>&nbsp;&middot;&nbsp;<a href="/auth/logout" onclick="event.preventDefault();document.getElementById('logout-form').submit();">Sign out</a><form id="logout-form" method="post" action="/auth/logout" style="display:none"></form>`
-        : `<a href="/auth/sign-in">Sign in</a>`
-    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(opts.title)} · Personal OS</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>${CSS}</style></head><body><header><div><strong>Personal OS</strong> &nbsp;<nav style="display:inline">${nav}</nav></div><div>${userBox}</div></header><main>${opts.body}</main></body></html>`
+    const userBox = opts.demoMode
+        ? `<span class="muted">demo · everyone shares this data</span>`
+        : opts.user
+            ? `<span class="muted">${esc(opts.user.name || opts.user.username)}</span>&nbsp;&middot;&nbsp;<a href="/auth/logout" onclick="event.preventDefault();document.getElementById('logout-form').submit();">Sign out</a><form id="logout-form" method="post" action="/auth/logout" style="display:none"></form>`
+            : `<a href="/auth/sign-in">Sign in</a>`
+    const banner = opts.demoMode
+        ? `<div style="background:#1f1f1f;color:#f59e0b;padding:0.5rem 2rem;font-size:0.85rem;text-align:center;border-bottom:1px solid #1f1f1f">Public demo · all visitors share the same account · <a href="https://github.com/socialloopai/PersonalOS/tree/teenybase-port" style="color:#f59e0b;text-decoration:underline">fork to get your own</a></div>`
+        : ''
+    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(opts.title)} · Personal OS</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>${CSS}</style></head><body>${banner}<header><div><strong>Personal OS</strong> &nbsp;<nav style="display:inline">${nav}</nav></div><div>${userBox}</div></header><main>${opts.body}</main></body></html>`
 }
 
 const signInPage = (err?: string) => layout({
@@ -186,9 +204,9 @@ const app = teenyHono<Env>(async (c) => {
     return $db
 })
 
-// Auth pages
-app.get('/auth/sign-in', (c) => c.html(signInPage()))
-app.get('/auth/sign-up', (c) => c.html(signUpPage()))
+// Auth pages — bypassed entirely when DEMO_USER_ID is set
+app.get('/auth/sign-in', (c) => c.env.DEMO_USER_ID ? c.redirect('/') : c.html(signInPage()))
+app.get('/auth/sign-up', (c) => c.env.DEMO_USER_ID ? c.redirect('/') : c.html(signUpPage()))
 
 function setAuthCookie(c: Context<Env>, token: string) {
     // Mirror teenybase's authCookie config: name=personal_os_auth, Path=/, HttpOnly, SameSite=Lax.
@@ -443,7 +461,7 @@ app.post('/api/health/oura/sync', async (c) => {
 app.post('/documents/upload', async (c) => {
     const u = await requireUser(c); if (u instanceof Response) return u
     const bucket = bucket(c)
-    if (!bucket) return c.html(layout({title: 'Upload', user: u, path: '/', body: '<h1>Upload failed</h1><p class="err">R2 bucket not bound. Run <code>teeny deploy --local</code> after adding the binding.</p>'}), 500)
+    if (!bucket) return c.html(layout({title: 'Upload', user: u, path: '/', demoMode: !!c.env.DEMO_USER_ID, body: '<h1>Upload failed</h1><p class="err">R2 bucket not bound. Run <code>teeny deploy --local</code> after adding the binding.</p>'}), 500)
 
     const form = await c.req.parseBody()
     const file = form.file as File | undefined
@@ -504,7 +522,7 @@ app.get('/', async (c) => {
         <button type="submit">Add project</button>
     </form>`
 
-    return c.html(layout({title: 'Home', user: u, path: '/', body: `<h1>Projects</h1>${projCards}<h2>Add a project</h2>${addForm}`}))
+    return c.html(layout({title: 'Home', user: u, path: '/', demoMode: !!c.env.DEMO_USER_ID, body: `<h1>Projects</h1>${projCards}<h2>Add a project</h2>${addForm}`}))
 })
 
 app.post('/projects/new', async (c) => {
@@ -579,7 +597,7 @@ app.get('/tasks', async (c) => {
         <select name="project" onchange="this.form.submit()"><option value="">All</option>${projOptions}</select>
     </form>`
 
-    return c.html(layout({title: 'Tasks', user: u, path: '/tasks', body: `<h1>Tasks</h1>${filterBar}${rowsHtml}<h2>Add a task</h2>${addForm}`}))
+    return c.html(layout({title: 'Tasks', user: u, path: '/tasks', demoMode: !!c.env.DEMO_USER_ID, body: `<h1>Tasks</h1>${filterBar}${rowsHtml}<h2>Add a task</h2>${addForm}`}))
 })
 
 app.post('/tasks/new', async (c) => {
@@ -630,7 +648,7 @@ app.get('/reflections', async (c) => {
         <textarea name="content" rows="8" placeholder="What's the day asking of you?" required></textarea>
         <button type="submit" style="align-self:flex-start">Save reflection</button>
     </form>`
-    return c.html(layout({title: 'Reflections', user: u, path: '/reflections', body: `<h1>Reflections</h1>${form}<h2>Recent</h2>${list}`}))
+    return c.html(layout({title: 'Reflections', user: u, path: '/reflections', demoMode: !!c.env.DEMO_USER_ID, body: `<h1>Reflections</h1>${form}<h2>Recent</h2>${list}`}))
 })
 
 app.post('/reflections/new', async (c) => {
@@ -686,7 +704,7 @@ app.get('/soul', async (c) => {
         <input name="time_of_day" placeholder="Time of day (morning/evening/...)">
         <button type="submit">Add habit</button>
     </form>`
-    return c.html(layout({title: 'Soul', user: u, path: '/soul', body: `<h1>Soul</h1>${list}<h2>Add a habit</h2>${addForm}`}))
+    return c.html(layout({title: 'Soul', user: u, path: '/soul', demoMode: !!c.env.DEMO_USER_ID, body: `<h1>Soul</h1>${list}<h2>Add a habit</h2>${addForm}`}))
 })
 
 app.post('/soul/new', async (c) => {
@@ -808,7 +826,7 @@ app.get('/finance', async (c) => {
     <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">PDF goes to your vault as <code>category=statement</code>, <code>processing_status=pending</code>. Run the <code>statement-importer</code> skill (or ask Claude) to parse pending statements into transactions.</p>`
 
     return c.html(layout({
-        title: 'Finance', user: u, path: '/',
+        title: 'Finance', user: u, path: '/', demoMode: !!c.env.DEMO_USER_ID,
         body: `<h1>Finance</h1>
             ${uploadBanner}
             <div class="grid grid-3">
@@ -847,7 +865,7 @@ app.get('/legal', async (c) => {
         <input name="next_action_date" type="date">
         <button type="submit">Add case</button>
     </form>`
-    return c.html(layout({title: 'Legal', user: u, path: '/legal', body: `<h1>Legal</h1>${html}<h2>Add case</h2>${form}`}))
+    return c.html(layout({title: 'Legal', user: u, path: '/legal', demoMode: !!c.env.DEMO_USER_ID, body: `<h1>Legal</h1>${html}<h2>Add case</h2>${form}`}))
 })
 
 app.post('/legal/new', async (c) => {
@@ -888,7 +906,7 @@ app.get('/taxes', async (c) => {
         <textarea name="notes" placeholder="Notes" rows="2"></textarea>
         <button type="submit">Add tax year</button>
     </form>`
-    return c.html(layout({title: 'Taxes', user: u, path: '/taxes', body: `<h1>Taxes</h1>${html}<h2>Add year</h2>${form}`}))
+    return c.html(layout({title: 'Taxes', user: u, path: '/taxes', demoMode: !!c.env.DEMO_USER_ID, body: `<h1>Taxes</h1>${html}<h2>Add year</h2>${form}`}))
 })
 
 app.post('/taxes/new', async (c) => {
@@ -927,7 +945,7 @@ app.get('/entities', async (c) => {
         <textarea name="notes" placeholder="Notes" rows="2"></textarea>
         <button type="submit">Add entity</button>
     </form>`
-    return c.html(layout({title: 'Entities', user: u, path: '/entities', body: `<h1>Business entities</h1>${html}<h2>Add entity</h2>${form}`}))
+    return c.html(layout({title: 'Entities', user: u, path: '/entities', demoMode: !!c.env.DEMO_USER_ID, body: `<h1>Business entities</h1>${html}<h2>Add entity</h2>${form}`}))
 })
 
 app.post('/entities/new', async (c) => {
@@ -960,7 +978,7 @@ app.get('/healthtab', async (c) => {
         rows.length === 0 ? '<p class="muted">No data yet.</p>'
         : `<table><thead><tr>${headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${cols.map(col => `<td>${r[col] ?? '<span class="muted">—</span>'}</td>`).join('')}</tr>`).join('')}</tbody></table>`
     return c.html(layout({
-        title: 'Health', user: u, path: '/healthtab',
+        title: 'Health', user: u, path: '/healthtab', demoMode: !!c.env.DEMO_USER_ID,
         body: `<h1>Health</h1>
             <h2>Oura — last 30 days</h2>
             ${renderRows(oura.results || [], ['Date', 'Readiness', 'Sleep', 'Activity', 'Sleep hrs', 'RHR', 'HRV'], ['date', 'readiness_score', 'sleep_score', 'activity_score', 'total_sleep_hrs', 'rhr_bpm', 'hrv_ms'])}
@@ -976,7 +994,7 @@ app.get('/profile', async (c) => {
         .prepare(`SELECT username, email, name, phone, citizenship, city, state, oura_access_token FROM users WHERE id = ?`)
         .bind(u.id).first<any>()
     return c.html(layout({
-        title: 'Profile', user: u, path: '/profile',
+        title: 'Profile', user: u, path: '/profile', demoMode: !!c.env.DEMO_USER_ID,
         body: `<h1>Profile</h1>
             <div class="card">
                 <p><strong>${esc(me?.name || me?.username)}</strong></p>
@@ -1007,7 +1025,7 @@ app.get('/ask', async (c) => {
         answer = `<p>Found <strong>${list.length}</strong> matching transactions, totaling <strong class="amount-out">${fmtUSD(total)}</strong>.</p>${list.length ? `<table><thead><tr><th>Date</th><th>Merchant</th><th>Category</th><th style="text-align:right">Amount</th></tr></thead><tbody>${list.map((r: any) => `<tr><td class="muted">${esc(r.date)}</td><td>${esc(r.merchant_name || r.name || '—')}</td><td>${esc(r.ai_category || '—')}</td><td style="text-align:right">${fmtUSD(r.amount)}</td></tr>`).join('')}</tbody></table>` : ''}`
     }
     return c.html(layout({
-        title: 'Ask', user: u, path: '/ask',
+        title: 'Ask', user: u, path: '/ask', demoMode: !!c.env.DEMO_USER_ID,
         body: `<h1>Ask</h1>
             <p class="muted">v1: keyword search across your transactions (date, merchant, category, description). LLM-backed natural language is v2.</p>
             <form method="get" action="/ask" style="max-width:600px">
