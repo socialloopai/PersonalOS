@@ -1044,7 +1044,7 @@ app.get('/finance', async (c) => {
     <p class="muted" style="font-size:0.85rem;margin-top:0.5rem">PDF goes to your vault as <code>category=statement</code>, <code>processing_status=pending</code>. Run the <code>statement-importer</code> skill (or ask Claude) to parse pending statements into transactions.</p>`
 
     return c.html(layout({
-        title: 'Finance', user: u, path: '/', demoMode: !!c.env.DEMO_USER_ID,
+        title: 'Finance', user: u, path: '/finance', demoMode: !!c.env.DEMO_USER_ID,
         body: `<h1>Finance</h1>
             ${uploadBanner}
             <div class="grid grid-3">
