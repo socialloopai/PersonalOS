@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "types": [
+            "@cloudflare/workers-types"
+        ],
+        "paths": {
+            "virtual:teenybase": [
+                "./teenybase"
+            ]
+        }
+    },
+    "include": [
+        "src/**/*.ts",
+        "teenybase.ts",
+        "worker-configuration.d.ts"
+    ]
+}

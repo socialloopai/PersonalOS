@@ -1,0 +1,10 @@
+{
+    "plugins": [
+        {
+            "path": "./node_modules/teenybase"
+        }
+    ],
+    "rules": [
+        "Never run npx wrangler directly. Always use npx teeny commands instead. The teeny CLI wraps wrangler with support for both teenybase and cloudflare platforms, handles auto-resource creation, authentication and edge-cases."
+    ]
+}

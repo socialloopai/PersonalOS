@@ -1,0 +1,25 @@
+{
+    // Use 'npx teeny' commands instead of 'npx wrangler' — teeny wraps wrangler with auto-resource creation and auth.
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "personal-os",
+    "account_id": "tb-TpEBJQlcQjKlirW3NkVoNQ",
+    "main": "src/index.ts",
+    "compatibility_date": "2026-05-28",
+    "compatibility_flags": ["nodejs_compat"],
+    "observability": {
+        "enabled": true,
+        "logs": {
+            "invocation_logs": true,
+            "head_sampling_rate": 1
+        }
+    },
+    "vars": { "RESPOND_WITH_ERRORS": "true" },
+    "d1_databases": [
+        {
+            "binding": "PRIMARY_DB",
+            "database_name": "personal-os-db",
+            "database_id": "TEENY_AUTO_CREATE",
+            "migrations_dir": "migrations"
+        }
+    ]
+}

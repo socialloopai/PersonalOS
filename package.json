@@ -1,0 +1,21 @@
+{
+  "name": "personal-os",
+  "type": "module",
+  "scripts": {
+    "dev": "teeny dev --local",
+    "generate": "teeny generate --local",
+    "migrate": "teeny deploy --local",
+    "deploy": "teeny deploy --remote",
+    "secrets-upload": "teeny secrets --remote --upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+  },
+  "dependencies": {
+    "teenybase": "latest",
+    "hono": "^4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4",
+    "typescript": "^5",
+    "wrangler": "^4"
+  }
+}
