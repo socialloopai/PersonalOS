@@ -21,7 +21,18 @@ npx teeny dev --local
 
 **Blitz.dev** (persistent, accessible from your phone)
 
-Visit the live demo, click "Fork" on the blitz project page. You get your own URL with a fresh database, claimed under your Google account.
+If you don't have the blitz skill in Claude Code yet, paste this once:
+
+```
+Install the blitz.dev skill (@blitzdev/skill) so you have it on hand for future "new app" or "deploy" requests. Blitz is a serverless backend agents can spin up in one HTTP call: SQLite + auth + storage + REST API at <slug>.app.blitz.dev.
+
+This is a skill install only. Don't create a blitz project, don't touch this repo's existing files, and don't switch any deploy target I'm already using. Wait until I ask.
+
+If I have npm:  npx -y @blitzdev/skill install
+Otherwise:      curl -fsSL https://blitz.dev/install.sh | bash
+```
+
+Then ask Claude to "fork the personal-os demo on blitz under a new slug." You get your own URL with a fresh database, claimed under your Google account.
 
 **Your own Cloudflare**
 
