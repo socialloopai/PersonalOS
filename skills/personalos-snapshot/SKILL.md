@@ -1,11 +1,11 @@
 ---
 name: personalos-snapshot
-description: Generate the user's daily BECOME snapshot — reads his reflection narrative + domain data, scores Be (inner work) and Do (outer work) across Sleep/Body/Food/Money/Tasks/Reflection, writes a characterization of his inner work, synthesizes Be × Do = Become per domain, aggregates with weighted arithmetic mean, computes day-over-day deltas, and writes to Supabase so PersonalOS renders it. Use this skill whenever the user says "yo let's go", "run the snapshot", "synthesize today", "do today's snapshot", "make today's becoming", "snapshot my day", or anything that sounds like he wants the day assessed through the BECOME lens. Also use when he finishes a reflection and asks what today is telling him. Even if the phrasing is casual or implicit, trigger this skill any time he's asking for the daily read on where he is versus where he's becoming. Do not invoke for general life advice, standalone project questions, or tasks that aren't explicitly about the daily snapshot.
+description: Generate the user's daily BECOME snapshot — reads his reflection narrative + domain data, scores Be (inner work) and Do (outer work) across Sleep/Body/Food/Money/Tasks/Reflection, writes a characterization of his inner work, synthesizes Be × Do = Become per domain, aggregates with weighted arithmetic mean, computes day-over-day deltas, and writes to the database so Personal OS renders it. Use this skill whenever the user says "yo let's go", "run the snapshot", "synthesize today", "do today's snapshot", "make today's becoming", "snapshot my day", or anything that sounds like he wants the day assessed through the BECOME lens. Also use when he finishes a reflection and asks what today is telling him. Even if the phrasing is casual or implicit, trigger this skill any time he's asking for the daily read on where he is versus where he's becoming. Do not invoke for general life advice, standalone project questions, or tasks that aren't explicitly about the daily snapshot.
 ---
 
 # PersonalOS Daily Snapshot (v2.3)
 
-This skill generates the user's daily BECOME snapshot. It's the synthesis engine for PersonalOS — it reads his reflection narrative and the day's domain data, characterizes the inner work, scores him across six domains, aggregates with a weighted arithmetic mean at the whole-self level (domain-level `Be × Do = Become` is still strict), computes day-over-day deltas, and writes the result to Supabase so the dashboard can render it.
+This skill generates the user's daily BECOME snapshot. It's the synthesis engine for PersonalOS — it reads his reflection narrative and the day's domain data, characterizes the inner work, scores him across six domains, aggregates with a weighted arithmetic mean at the whole-self level (domain-level `Be × Do = Become` is still strict), computes day-over-day deltas, and writes the result to the database so the dashboard can render it.
 
 ## The philosophy (why this matters)
 
@@ -40,7 +40,7 @@ Equivalent SQL expression used throughout: `((ts AT TIME ZONE 'America/Los_Angel
 
 Default to the narrative day derived from "now" PT. If the user names a specific date ("do the 17th"), honor that and snapshot against it — he knows what he's attributing to what. Always confirm the date before writing if there's any ambiguity (e.g. a late-night/early-morning reflection that could belong to either side of the cutoff).
 
-Supabase project id: `YOUR_SUPABASE_PROJECT_REF`. Use the Supabase MCP (`<your-supabase-mcp>__execute_sql`) for reads and `apply_migration` is **not** needed — only `execute_sql`.
+Base URL: `$PERSONAL_OS_URL` (env var). Auth: `Authorization: Bearer $PERSONAL_OS_TOKEN`. See `~/.claude/skills/TEENYBASE-API.md` for query patterns.. Use the teenybase REST API (the teenybase REST API (see `~/.claude/skills/TEENYBASE-API.md`)) for reads and `apply_migration` is **not** needed — only `execute_sql`.
 
 Schema version written: `schema_version = 2`.
 
@@ -241,7 +241,7 @@ Structure (don't label the sections, but cover this ground in roughly this order
 
 The synthesis goes into the `insight` column. If it wants to run longer than the column allows, save the full text and trust that the frontend will scroll.
 
-### 13. Write to Supabase
+### 13. Write to the database
 
 Upsert to `snapshots`:
 
@@ -349,7 +349,7 @@ Open the dashboard: https://your-personalos-deployment.example.com
 
 **Never pump Be.** Temptation to soften a low Be because it makes Become look sad. Resist. Truthful 3 > dishonest 6.
 
-**Never skip the Supabase write.** The dashboard reads from `snapshots`. Writing to both denormalized columns and the `domains` JSONB is mandatory.
+**Never skip the database write.** The dashboard reads from the `snapshots` table. Writing to both denormalized columns and the `domains` JSONB is mandatory.
 
 **Never skip `snapshot_runs`.** The audit log is how we debug regressions later.
 

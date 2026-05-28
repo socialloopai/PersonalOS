@@ -3,7 +3,7 @@
     "$schema": "node_modules/wrangler/config-schema.json",
     "name": "personal-os",
     "account_id": "tb-TpEBJQlcQjKlirW3NkVoNQ",
-    "main": "src/index.ts",
+    "main": "worker.ts",
     "compatibility_date": "2026-05-28",
     "compatibility_flags": ["nodejs_compat"],
     "observability": {
@@ -21,5 +21,14 @@
             "database_id": "TEENY_AUTO_CREATE",
             "migrations_dir": "migrations"
         }
-    ]
+    ],
+    "r2_buckets": [
+        {
+            "binding": "PRIMARY_BUCKET",
+            "bucket_name": "personal-os-files"
+        }
+    ],
+    "triggers": {
+        "crons": ["0 9 * * *"]
+    }
 }

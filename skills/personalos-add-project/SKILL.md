@@ -5,7 +5,7 @@ description: >
   the user says "add a project", "create a project", "new project", "I want to start
   a project", or any similar request to add something to the PersonalOS project system.
   This skill guides an interview across 4 layers (Being, Doing, Becoming, Foundation)
-  before touching Supabase. Supports both standalone projects and sub-projects nested
+  before touching the database. Supports both standalone projects and sub-projects nested
   under a parent. Never skip the interview — always complete all 4 layers.
 ---
 
@@ -23,7 +23,7 @@ Run the interview below, one layer at a time. Ask conversationally, not as a for
 Before the interview, ask one question:
 - "Is this a standalone project, or does it belong under an existing project as a sub-project?"
 
-If it's a **sub-project**: query Supabase for the current project list so the user can confirm which parent it belongs to. Save the parent's UUID as `parent_id` — include it in the INSERT. Sub-projects go through the full 4-layer interview. They inherit their parent's color unless the user specifies otherwise.
+If it's a **sub-project**: query the database for the current project list so the user can confirm which parent it belongs to. Save the parent's UUID as `parent_id` — include it in the INSERT. Sub-projects go through the full 4-layer interview. They inherit their parent's color unless the user specifies otherwise.
 
 If it's **standalone**: `parent_id` is null. Proceed to Layer 1.
 
@@ -87,7 +87,7 @@ Say: "Here's what I've captured — does this look right before I add it?"
 
 ---
 
-## Step 1 — Insert into Supabase
+## Step 1 — Insert into the database
 
 Once confirmed, for a **standalone project**:
 
@@ -124,7 +124,7 @@ VALUES (
 RETURNING id;
 ```
 
-Note: do NOT set be_score manually. It is auto-calculated by a Supabase trigger from task impact scores. It starts at 0 and rises as tasks are added.
+Note: do NOT set be_score manually. It is auto-calculated by a database trigger from task impact scores. It starts at 0 and rises as tasks are added.
 
 Save the returned `id` — you need it for the task insert and the memory file.
 
@@ -167,7 +167,7 @@ type: project
 ## Key context & decisions
 [Any other relevant context from the interview — constraints, dependencies, what's been decided, what's still open]
 
-## Supabase project ID
+## Personal OS row ID
 [The UUID returned from the INSERT]
 ```
 
@@ -192,7 +192,7 @@ VALUES ('[project_id]', '[foundation task name]', 'todo', 'critical', 5);
 ## Confirm completion
 
 Report back:
-- ✅ Project name + Supabase ID (+ parent project if sub-project)
+- ✅ Project name + Personal OS row ID (+ parent project if sub-project)
 - ✅ Memory file saved at `project_[slug].md`
 - ✅ First Foundation task added (impact 5)
 

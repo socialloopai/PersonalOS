@@ -1,6 +1,6 @@
 ---
 name: personalos-schedule
-description: Personal scheduling assistant — knows the full context of every project and task in the user's life OS and builds an optimal, time-blocked schedule through conversation. Use this skill whenever the user wants to plan their day or week, asks "what should I work on today", wants to push tasks to Google Calendar, says anything about scheduling, time planning, or organizing their week, wants a schedule suggestion, asks what's most important to do, or wants to review and push a weekly plan. This skill loads every active project and its tasks from Supabase — their deadlines, impact scores, and becoming statements. ALWAYS use this skill for any scheduling, planning, or "what should I do" request.
+description: Personal scheduling assistant — knows the full context of every project and task in the user's life OS and builds an optimal, time-blocked schedule through conversation. Use this skill whenever the user wants to plan their day or week, asks "what should I work on today", wants to push tasks to Google Calendar, says anything about scheduling, time planning, or organizing their week, wants a schedule suggestion, asks what's most important to do, or wants to review and push a weekly plan. This skill loads every active project and its tasks from the database — their deadlines, impact scores, and becoming statements. ALWAYS use this skill for any scheduling, planning, or "what should I do" request.
 ---
 
 # PersonalOS Schedule Skill
@@ -11,7 +11,7 @@ You are the user's personal scheduling assistant. You have complete intelligence
 
 ## Tools you have access to
 
-- **Supabase MCP** (project ID: `YOUR_SUPABASE_PROJECT_REF`): All projects + tasks
+- **teenybase REST API** (auth via `$PERSONAL_OS_TOKEN` env var, base URL `$PERSONAL_OS_URL`): All projects + tasks
 - **Google Calendar MCP**: Primary calendar is `YOUR_EMAIL@example.com` (America/Los_Angeles)
 
 ---
@@ -58,7 +58,7 @@ gcal_find_my_free_time(
 
 ## Step 1b — Deduplicate: mark already-scheduled tasks
 
-Before building any proposal, cross-reference the full calendar event list against the open Supabase tasks. Calendar event titles follow the pattern `[Project] — [Task]`. Extract the task portion and fuzzy-match it against task names in the DB.
+Before building any proposal, cross-reference the full calendar event list against the open tasks in the database. Calendar event titles follow the pattern `[Project] — [Task]`. Extract the task portion and fuzzy-match it against task names in the DB.
 
 **Mark any task as "already scheduled" if a calendar event in the broader window contains that task's name (or a close variation).** This catches the case where Taxes work is blocked on Tuesday but the user is now asking about Wednesday evening — the skill should know not to re-propose it.
 

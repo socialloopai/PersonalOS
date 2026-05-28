@@ -4,7 +4,10 @@ import {usersTable} from './modules/users'
 import {plaidItemsTable, bankAccountsTable, transactionsTable, liabilitiesTable} from './modules/finance'
 import {documentsTable} from './modules/documents'
 import {businessEntitiesTable, legalCasesTable, taxYearNotesTable} from './modules/entities-legal-taxes'
-import {appleHealthDailyTable, ouraDailyTable} from './modules/health'
+import {appleHealthDailyTable, ouraDailyTable, nutritionLogTable, workoutsTable, dailyCheckinTable} from './modules/health'
+import {projectsTable, tasksTable, projectSnapshotsTable} from './modules/projects'
+import {reflectionsTable, snapshotsTable, snapshotRunsTable, debriefsTable} from './modules/reflections-snapshots'
+import {soulItemsTable, soulLogsTable, soulItemStepsTable, soulStepLogsTable} from './modules/soul'
 
 export default {
     appName: 'Personal OS',
@@ -13,7 +16,19 @@ export default {
     authCookie: {name: 'personal_os_auth'},
     tables: [
         usersTable,
-        // FK order matters for table creation:
+        // FK order matters for table creation. Projects must precede tasks + soul_items
+        // since both reference it. Snapshots precede snapshot_runs + debriefs.
+        projectsTable,
+        tasksTable,
+        projectSnapshotsTable,
+        reflectionsTable,
+        snapshotsTable,
+        snapshotRunsTable,
+        debriefsTable,
+        soulItemsTable,
+        soulLogsTable,
+        soulItemStepsTable,
+        soulStepLogsTable,
         plaidItemsTable,
         bankAccountsTable,
         transactionsTable,
@@ -23,6 +38,9 @@ export default {
         taxYearNotesTable,
         appleHealthDailyTable,
         ouraDailyTable,
+        nutritionLogTable,
+        workoutsTable,
+        dailyCheckinTable,
         // documents references entities + legal_cases + bank_accounts, so it goes last
         documentsTable,
     ],

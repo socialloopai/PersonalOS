@@ -30,7 +30,7 @@ You know the target Become (the becoming_statement). You know the current Be (li
 
 ### Suggest Step 1 — Load full project state
 
-Read the memory file AND query Supabase together:
+Read the memory file AND query the database together:
 
 ```sql
 SELECT
@@ -162,7 +162,7 @@ Then ask: *"Which of these do you want to add? Pick one, several, or all — or 
 
 ### Suggest Step 5 — Add selected tasks
 
-For each task the user selects, run the standard Add Mode Steps 4–5 (score confirmation + Supabase insert). The context from Step 2 means you can skip straight to insert — you already have the full picture.
+For each task the user selects, run the standard Add Mode Steps 4–5 (score confirmation + database insert). The context from Step 2 means you can skip straight to insert — you already have the full picture.
 
 ---
 
@@ -177,7 +177,7 @@ Run all 5 steps. No exceptions.
 Read from: `~/.claude/projects/PersonalOS/memory/project_[slug].md`
 If unsure of slug, check `~/.claude/projects/PersonalOS/memory/MEMORY.md`
 
-The memory file gives you: definition of done, becoming_statement, biggest threat, key decisions, Supabase project ID.
+The memory file gives you: definition of done, becoming_statement, biggest threat, key decisions, Personal OS row ID.
 
 ### Step 2 — Query current task state
 
@@ -220,13 +220,13 @@ Report back: task name, impact score, one-line reasoning, Do score direction.
 
 ## If no memory file exists for the project
 
-Query Supabase directly for the full project record and use it as context. After adding, offer to create the memory file retroactively.
+Query the database directly for the full project record and use it as context. After adding, offer to create the memory file retroactively.
 
 ---
 
 ## How Be is calculated
 
-Be is auto-calculated by Supabase trigger on every task change:
+Be is auto-calculated by database trigger on every task change:
 `Be = (avg impact of active tasks / 5) × 10`
 
 Be zones: 7–10 deep engagement · 4–6 execution phase · 1–3 identity drift warning · 0 void

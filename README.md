@@ -1,120 +1,136 @@
-# PersonalOS
+# PersonalOS (teenybase port)
 
-A single-file, identity-anchored personal operating system. One HTML file, one Supabase project, every domain of your life on one canvas: projects, tasks, finance, body, legal, taxes, reflections, soul.
+> A single-deploy personal operating system. Every domain of your life on one canvas: projects, tasks, finance, body, legal, taxes, reflections, soul. SSR Hono routes on Cloudflare Workers + D1 + R2. Schema is one config file. Open it in any agent and it knows your whole life.
 
-The thesis: every project is a commitment to becoming someone. Every task is a vote toward that identity. The system's job is to make the gap between who you are now and who you're becoming measurable — so the next right action is always visible.
+This branch (`teenybase-port`) reshapes the original Supabase-based PersonalOS to run on [teenybase](https://github.com/teenybase/teenybase) — open-source Cloudflare Workers framework. Same shape of OS, same skills, runs anywhere a teenybase config runs.
 
-Read [`BLUEPRINT.md`](./BLUEPRINT.md) for the underlying methodology.
+## Try the live demo
 
----
+**[https://personal-os.app.blitz.dev](https://personal-os.app.blitz.dev)**
 
-## What it is
+Sign in: `alex@demo.personal-os.app` / `demopass123`
 
-- **One file.** The entire app is `index.html` — no build step, no framework, no bundler. Open it in a browser.
-- **Vanilla JS + CSS.** ~7,500 lines of hand-written code. Quiet-luxury design system (monochrome + amber accent).
-- **Supabase backend.** Postgres + auth + storage + edge functions. You bring your own project.
-- **Plaid for finance (optional).** Connect bank accounts for automatic transaction sync. Skip if you don't need it.
-- **AI-assisted rituals.** Snapshots, reflections, and synthesis are driven by Claude (via Claude Code or any Claude-capable tool you wire up).
+Pre-seeded with a fake person (Alex): 7 transactions, 2 projects + tasks with Be scores, an I-140 case, two LLCs, 2024 tax notes, Oura + Apple Health day, a habit on a 3-day streak, a reflection.
 
-## Tabs
+Try `/ask?q=coffee` and watch it return "Found 5 matching transactions, totaling $61.50."
 
-- **Home** — projects with "becoming statements" and Be/Do/Become scores
-- **Tasks** — flat task list across projects, sorted by what matters today
-- **Finance** — Plaid-synced transactions, monthly minimums, runway
-- **Physique** — workout rotation, recovery data (Apple Health + Oura)
-- **Legal** — case tracker (USCIS, court, permits, documents) for self + a dependent
-- **Taxes** — multi-year document storage and notes
-- **Reflections** — journal with day/week/month/year zoom-lens
-- **Soul** — habits and morning routines
+The demo is hosted on [blitz.dev](https://blitz.dev), a free serverless host that runs teenybase apps. Click "Fork on blitz" from the project page to get your own copy with a fresh database in seconds.
 
-## Quick start
+## Tabs (11 SSR routes)
 
-### 1. Clone and configure
+| Route | What |
+|---|---|
+| `/` (Home) | Projects with becoming statements + auto-recomputed Be score |
+| `/tasks` | Flat task list across projects, status toggles inline |
+| `/finance` | MTD income/expenses, accounts, recent transactions, statement upload, Plaid Connect |
+| `/legal` | USCIS / court / permits / documents tracker |
+| `/taxes` | Per-year status + notes |
+| `/entities` | LLCs / C-corps with EIN, state, formation date |
+| `/healthtab` | Last 30 days of Oura + Apple Health side-by-side |
+| `/reflections` | Markdown journal with full-text search |
+| `/soul` | Habits with one-tap daily check-in + streak |
+| `/ask` | Keyword search across all transactions, with totals |
+| `/profile` | Identity info + Oura PAT setting |
 
-```bash
-git clone https://github.com/YOUR_USERNAME/PersonalOS.git
-cd PersonalOS
-cp config.example.js config.js
-```
+All CRUD via plain HTML forms. No JS framework. The only JS that ships is the Plaid Link client script (~50 lines) and the file upload progress bar.
 
-Open `config.js` and fill in your Supabase URL and anon key (from Supabase → Settings → API).
+## Three ways to run it
 
-### 2. Set up Supabase
-
-Create a new Supabase project, then apply the schema and create the storage buckets. Full instructions live in [`supabase/README.md`](./supabase/README.md). The short version:
+### 1. Local (private, no third party)
 
 ```bash
-psql "$YOUR_SUPABASE_DB_URL" -f supabase/schema.sql
-# Then in the dashboard → Storage, create buckets:
-#   identity-docs, statements, tax-docs, entity-docs
+git clone https://github.com/socialloopai/PersonalOS.git
+cd PersonalOS && git checkout teenybase-port
+npm install
+npx teeny generate --local && npx teeny deploy --local --yes
+npx teeny dev --local
 ```
 
-If you want bank-account sync, deploy the Plaid edge function (see `supabase/functions/plaid-sync/`). It's a skeleton — fill in your Plaid credentials and the `/transactions/sync` call. If you skip Plaid, the statement-importer flow handles transactions manually from PDFs.
+Open `http://localhost:8787`. SQLite on disk, nothing leaves your laptop.
 
-**⚠️ Security model.** The schema turns on RLS but uses *permissive* policies (anon can read/write everything) — that's PersonalOS's single-user design. Your security is "keep your Supabase URL and anon key private." If you ever publish `config.js`, anyone with it can read your data. To run multi-user, add Supabase Auth + `owner_id` columns + `auth.uid()` policies. See `supabase/README.md` for details.
+### 2. Fork the blitz demo (easy mode, persistent, accessible from phone)
 
-### 3. Serve the file
+Visit the [live demo](https://personal-os.app.blitz.dev), click **Fork** from the blitz project page, and you get your own URL + a fresh database. Sign up under your own email. Free during blitz's pre-alpha period.
 
-Any static server works:
+### 3. Your own Cloudflare account (full control)
 
 ```bash
-python3 -m http.server 8000
-# or
-npx serve .
+git clone https://github.com/socialloopai/PersonalOS.git
+cd PersonalOS && git checkout teenybase-port
+npm install
+npx wrangler login
+npx teeny deploy --remote --yes
+npx teeny secrets --remote --upload
 ```
 
-Then open `http://localhost:8000`.
+Workers + D1 + R2 in your CF account.
 
-You can also just double-click `index.html` — but Plaid and some Supabase storage features need a real `http(s)://` origin.
+## Optional integrations
 
-## Architecture
+| Feature | Tier 1 (local) | Tier 2/3 (deployed) | Setup |
+|---|---|---|---|
+| **Statement-importer** (PDF → transactions via Claude) | yes | yes | Upload PDF, run `skills/statement-importer/scripts/process_statements.py` |
+| **Plaid live bank sync** | yes (with sandbox) | yes (needs Production approval) | Paste `PLAID_CLIENT_ID` + `PLAID_SECRET` into `.dev.vars` or blitz secrets |
+| **Apple Health** | yes | yes | iOS Shortcut POSTs to `/api/health/apple` once daily |
+| **Oura ring** | yes | yes | Paste Personal Access Token in `/profile`, daily cron syncs |
 
-- **No framework.** Pages are `<div class="page">` blocks; a tiny `navigate()` function swaps them.
-- **All data lives in Supabase.** Every render function fetches what it needs and rebuilds its DOM.
-- **Be/Do/Become scoring.** Projects have a `becoming_statement` (identity target). A Postgres trigger recomputes `be_score` whenever a task changes. The dashboard aggregates into a 0–100 Become score across six domains.
-- **AI rituals as buttons that copy prompts.** The "synthesize" buttons don't call an API — they copy a prompt to your clipboard for you to paste into Claude. Your AI sessions then write back into Supabase via standard inserts.
+## Security
 
-## Claude skills
+- Local: SQLite on your disk. Nothing leaves the machine.
+- Blitz fork: your own claimed project, isolated D1 + R2, behind Google SSO if you enable it.
+- Own CF: your account, your bindings, no shared infrastructure.
 
-The `skills/` directory holds the AI rituals — Claude Code / Claude Desktop skills that read and write Supabase to drive the OS:
+Tier 1 ships with permissive row-level rules (`'true'` everywhere) because it's single-user. For multi-user deployments, switch the rules to `auth.uid == owner_id` in each module file. Every table has `owner_id` populated from day one to make the switch trivial.
 
-| Skill | Triggered by | What it does |
+## Schema (25 tables in `modules/`)
+
+| Module | Tables |
+|---|---|
+| `users.ts` | users (auth + profile fields extended) |
+| `projects.ts` | projects, tasks, project_snapshots |
+| `reflections-snapshots.ts` | reflections, snapshots, snapshot_runs, debriefs |
+| `soul.ts` | soul_items, soul_logs, soul_item_steps, soul_step_logs |
+| `health.ts` | apple_health_daily, oura_daily, nutrition_log, workouts, daily_checkin |
+| `finance.ts` | plaid_items, bank_accounts, transactions, liabilities |
+| `entities-legal-taxes.ts` | business_entities, legal_cases, tax_year_notes |
+| `documents.ts` | documents (unified: identity / entity / tax / statement / other) |
+
+Three SQLite triggers preserve the BECOME core: `tasks_set_completed_at_on_done`, `tasks_clear_completed_at_on_undone`, `tasks_be_recompute_*`. `be_score` auto-recomputes from active task impacts whenever a task changes.
+
+## Claude skills (in `skills/`)
+
+| Skill | Trigger | What it does |
 |---|---|---|
-| `personalos-add-task` | "add a task", "what should I do?" | Impact-scored task intake with a suggest mode that uses the BECOME formula |
-| `personalos-add-project` | "add a project", "new project" | 4-layer interview (Being/Doing/Becoming/Foundation) before any insert |
-| `personalos-add-habit` | "add a habit", "track X" | 3-layer habit interview for the Soul tab |
-| `personalos-snapshot` | "run today's snapshot", "yo let's go" | Generates the daily BECOME synthesis across six domains, writes to `snapshots` |
-| `personalos-debrief` | "morning brief", "orient me" | One-paragraph morning orientation, writes to `debriefs` |
-| `personalos-schedule` | "plan my day/week", "what should I work on" | Loads projects + tasks + calendar, builds a time-blocked plan, pushes to Google Calendar |
-| `statement-importer` | "import statements", "process the pending statements" | Python script that processes bank statement PDFs from Supabase Storage and categorizes transactions with Claude |
+| `personalos-add-task` | "add a task", "what should I do?" | Impact-scored intake + Suggest Mode via Do = Become ÷ Be |
+| `personalos-add-project` | "add a project" | 4-layer interview (Being/Doing/Becoming/Foundation) |
+| `personalos-add-habit` | "add a habit" | 3-layer habit interview for the Soul tab |
+| `personalos-snapshot` | "yo let's go", "run the snapshot" | Daily BECOME synthesis across six domains |
+| `personalos-debrief` | "morning brief", "orient me" | One-paragraph morning orientation |
+| `personalos-schedule` | "plan my day/week" | Pulls projects + tasks + calendar, builds time-blocked plan |
+| `statement-importer` | "import statements" | Python script: PDF → transactions, dedup via hash |
 
-To use them with [Claude Code](https://docs.claude.com/en/docs/claude-code/skills): copy any skill directory into `~/.claude/skills/`. To use them as `.skill` bundles in Claude Desktop or Anthropic Console: zip each directory.
+All skills now talk to teenybase REST instead of Supabase MCP. See [`skills/TEENYBASE-API.md`](./skills/TEENYBASE-API.md) for the cheat sheet (auth, query syntax, schema diffs).
 
-Each skill's `SKILL.md` is the source of truth — the frontmatter describes triggers, and the body is the protocol Claude follows. Customize freely; the philosophy in [`BLUEPRINT.md`](./BLUEPRINT.md) is what holds them together.
+Drop any skill folder into `~/.claude/skills/` to use it with Claude Code.
 
-## Configuration
+## Architecture diff vs original PersonalOS
 
-Everything secret lives in `config.js` (gitignored). `config.example.js` shows the shape:
+| | Original | This branch |
+|---|---|---|
+| Backend | Supabase (Postgres + Auth + Storage + Edge Functions) | teenybase (Cloudflare Workers + D1 SQLite + R2 + Hono) |
+| Frontend | 7,520-line vanilla JS SPA in `index.html` | ~1,800-line SSR Hono routes in `worker.ts` |
+| Schema source | `supabase/schema.sql` (~25 tables) | `teenybase.ts` + 8 modules, same 25 tables |
+| Migrations | Manual SQL | Auto-diffed by `teeny generate` |
+| Statement bucket | Supabase Storage `statements` bucket | R2 file field on `documents` table |
+| Auth | Permissive RLS, anon-key-secret | teenybase JWT, cookie-based, multi-user ready |
+| Plaid | Edge function skeleton | Working Hono routes (`/api/plaid/link-token`, `/exchange`) |
+| Cost | Free Supabase tier (limited) | Free Cloudflare Workers tier (generous) + blitz hosted |
 
-```js
-window.PERSONAL_OS_CONFIG = {
-  SUPABASE_URL: 'https://YOUR_PROJECT_REF.supabase.co',
-  SUPABASE_ANON: 'YOUR_ANON_PUBLIC_KEY',
-};
-```
+The Be/Do/Become philosophy, the schema, the skills, the tabs, and the workflow are unchanged. What's changed is the underlying engine.
 
-If you wire up Plaid, the Supabase edge function `plaid-sync` holds your Plaid `client_id` and `secret` server-side — they never touch the browser.
+## Credits
 
-## Contributing
-
-This started as one person's personal OS and is now open for forks. Contributions especially welcome:
-
-1. **Schema corrections.** `supabase/schema.sql` was reverse-engineered from app queries — column types and lengths are best guesses. If you spot mismatches against real usage, PRs welcome.
-2. **A `plaid-sync` implementation.** The current edge function is a skeleton. A working `/transactions/sync` + cursor + webhook handler would unlock the Finance tab for everyone.
-3. **Multi-user mode.** Add Supabase Auth, `owner_id` columns, and tight RLS policies. Non-trivial but the cleanest path off "URL secrecy as security."
-4. **Optional features as togglable modules.** Some tabs (Legal, Taxes, Soul) are deeply personal in shape — make them feel optional, not load-bearing.
-
-PRs: keep the single-file philosophy (no build step, no framework). If a change requires a bundler, it's probably a fork, not a PR.
+Original [PersonalOS](https://github.com/socialloopai/PersonalOS) by [@socialloopai](https://github.com/socialloopai). This branch ports it to teenybase, then adds the SSR layer + Plaid integration + statement-importer skill port.
 
 ## License
 
