@@ -6,11 +6,9 @@ PersonalOS keeps everything you'd otherwise lose track of in one database: bank 
 
 Live demo at **https://personal-os.app.blitz.dev**. No signup, you land on Alex's seeded dashboard: 2 projects, 7 transactions, an I-140 case, two LLCs, an Oura day, a coffee habit on a 3-day streak. Try `/ask?q=coffee`.
 
-Built on [teenybase](https://github.com/teenybase/teenybase), the open-source framework Blitz runs on. Schema and access rules in one TypeScript config, auth + REST API + R2 storage generated from that. Runs anywhere teenybase runs.
+## Fork to make your own
 
-## Fork to get your own
-
-Three deploy paths, same code.
+Three options.
 
 **Local** (private, nothing leaves your laptop)
 
@@ -21,17 +19,17 @@ npx teeny generate --local && npx teeny deploy --local --yes
 npx teeny dev --local
 ```
 
-**Blitz.dev** (persistent, accessible from your phone)
+**Blitz.dev project on Cloudflare** (persistent on the cloud accessible from your phone)
 
 Paste into Claude Code:
 
 ```
-Install the blitz skill (`npx -y @blitzdev/skill install`) and fork github.com/socialloopai/PersonalOS to a new blitz.dev slug.
+Install the blitz skill (`npx -y @blitzdev/skill install`), clone github.com/socialloopai/PersonalOS and deploy it to a new Blitz project running on Cloudflare.
 ```
 
 You get your own URL with a fresh database, claimed under your Google account.
 
-**Your own Cloudflare**
+**Self-hosted on Cloudflare**
 
 ```bash
 git clone https://github.com/socialloopai/PersonalOS.git
@@ -41,7 +39,7 @@ npx teeny deploy --remote --yes
 
 ## What's in it
 
-11 SSR tabs: Home (projects with Be scores), Tasks, Finance, Legal, Taxes, Entities, Health, Reflections, Soul (habits), Ask, Profile. All CRUD via plain HTML forms, no JS framework. The only client-side script is Plaid Link.
+11 tabs: Home (projects with Be scores), Tasks, Finance, Legal, Taxes, Entities, Health, Reflections, Soul (habits), Ask, Profile. All CRUD via plain HTML forms, no JS framework. The only client-side script is Plaid Link.
 
 Schema is 25 tables in `modules/` plus three SQLite triggers preserving the BECOME core (`tasks_be_recompute_*`). Schema lives in `teenybase.ts`, migrations are auto-diffed by `teeny generate`.
 
