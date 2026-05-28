@@ -46,20 +46,19 @@ npx teeny deploy --remote --yes
 - **Apple Health**. iOS Shortcut POSTs daily metrics to `/api/health/apple`.
 - **Oura**. Paste your Personal Access Token in `/profile`, a Cloudflare cron syncs nightly.
 
-## Connecting your real bank (Plaid Production)
+## Connecting your real bank (Plaid Trial plan)
 
-The demo and a fresh install both run in Plaid sandbox by default. Fake banks, fake transactions, test login is `user_good` / `pass_good`. To wire up your actual Chase or BofA you need Plaid Production access. It is real and free to apply for, here is the path:
+The demo and a fresh install both run in Plaid sandbox by default. Fake banks, fake transactions, test login is `user_good` / `pass_good`. For your actual Chase, BofA, Wells Fargo or any OAuth bank, switch to Plaid's free Trial plan. It gives real production access for up to 10 connected banks with no approval wait. Path:
 
-1. Sign up at https://dashboard.plaid.com/signup
-2. In the dashboard, go to Team Settings → Keys. Sandbox creds are there immediately. Production starts disabled.
-3. Click "Request Production". Plaid asks what you're building. "Personal finance dashboard for my own bank accounts" is the truthful answer that usually gets approved in 1 to 5 business days.
-4. Once approved, copy the Production `client_id` and `secret` and set them on your deployment:
+1. Sign up at https://dashboard.plaid.com/signup and pick "Personal use" when asked. You land directly on the Trial plan.
+2. Team Settings → Keys. Copy your Production `client_id` and `secret`.
+3. Set them on your deployment:
    - **Local**: edit `.dev.vars` with `PLAID_CLIENT_ID=...`, `PLAID_SECRET=...`, `PLAID_ENV=production`, restart `teeny dev --local`.
    - **Blitz fork**: on the blitz.dev project page, add `PLAID_CLIENT_ID` and `PLAID_SECRET` as secrets and `PLAID_ENV=production` as a var, then commit to redeploy.
    - **Self-hosted Cloudflare**: same as local but put the values in `.prod.vars`, then `npx teeny secrets --remote --upload`.
-5. Click "Connect a bank account" on the Finance tab. Real Plaid Link opens, log in to your bank normally.
+4. Click "Connect a bank account" on the Finance tab. Real Plaid Link opens, log in to your bank normally.
 
-Pricing for personal use is roughly $0.30 per connected item per month plus per-API-call fees. Three or four banks tends to run $1 to $2 per month. Sandbox stays free indefinitely.
+The Trial plan covers a single person tracking their own accounts. Past 10 banks you upgrade to Pay-as-you-go (pricing shown during the upgrade flow). Trial bundles the products PersonalOS needs (Transactions, Auth, Balance) so there's nothing extra to enable.
 
 ## Claude skills
 
