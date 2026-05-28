@@ -161,7 +161,7 @@ function layout(opts: {title: string; user: User | null; path: string; body: str
             ? `<span class="muted">${esc(opts.user.name || opts.user.username)}</span>&nbsp;&middot;&nbsp;<a href="/auth/logout" onclick="event.preventDefault();document.getElementById('logout-form').submit();">Sign out</a><form id="logout-form" method="post" action="/auth/logout" style="display:none"></form>`
             : `<a href="/auth/sign-in">Sign in</a>`
     const banner = opts.demoMode
-        ? `<div style="background:#1f1f1f;color:#f59e0b;padding:0.5rem 2rem;font-size:0.85rem;text-align:center;border-bottom:1px solid #1f1f1f">Public demo · all visitors share the same account · <a href="https://github.com/socialloopai/PersonalOS/tree/teenybase-port" style="color:#f59e0b;text-decoration:underline">fork to get your own</a></div>`
+        ? `<div style="background:#1f1f1f;color:#f59e0b;padding:0.5rem 2rem;font-size:0.85rem;text-align:center;border-bottom:1px solid #1f1f1f">Public demo · all visitors share the same account · <a href="https://blitz.dev/fork/personal-os" style="color:#f59e0b;text-decoration:underline">fork to get your own</a></div>`
         : ''
     return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(opts.title)} · Personal OS</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>${CSS}</style></head><body>${banner}<header><div><strong>Personal OS</strong> &nbsp;<nav style="display:inline">${nav}</nav></div><div>${userBox}</div></header><main>${opts.body}</main></body></html>`
 }
