@@ -68,6 +68,24 @@ You can also just double-click `index.html` — but Plaid and some Supabase stor
 - **Be/Do/Become scoring.** Projects have a `becoming_statement` (identity target). A Postgres trigger recomputes `be_score` whenever a task changes. The dashboard aggregates into a 0–100 Become score across six domains.
 - **AI rituals as buttons that copy prompts.** The "synthesize" buttons don't call an API — they copy a prompt to your clipboard for you to paste into Claude. Your AI sessions then write back into Supabase via standard inserts.
 
+## Claude skills
+
+The `skills/` directory holds the AI rituals — Claude Code / Claude Desktop skills that read and write Supabase to drive the OS:
+
+| Skill | Triggered by | What it does |
+|---|---|---|
+| `personalos-add-task` | "add a task", "what should I do?" | Impact-scored task intake with a suggest mode that uses the BECOME formula |
+| `personalos-add-project` | "add a project", "new project" | 4-layer interview (Being/Doing/Becoming/Foundation) before any insert |
+| `personalos-add-habit` | "add a habit", "track X" | 3-layer habit interview for the Soul tab |
+| `personalos-snapshot` | "run today's snapshot", "yo let's go" | Generates the daily BECOME synthesis across six domains, writes to `snapshots` |
+| `personalos-debrief` | "morning brief", "orient me" | One-paragraph morning orientation, writes to `debriefs` |
+| `personalos-schedule` | "plan my day/week", "what should I work on" | Loads projects + tasks + calendar, builds a time-blocked plan, pushes to Google Calendar |
+| `statement-importer` | "import statements", "process the pending statements" | Python script that processes bank statement PDFs from Supabase Storage and categorizes transactions with Claude |
+
+To use them with [Claude Code](https://docs.claude.com/en/docs/claude-code/skills): copy any skill directory into `~/.claude/skills/`. To use them as `.skill` bundles in Claude Desktop or Anthropic Console: zip each directory.
+
+Each skill's `SKILL.md` is the source of truth — the frontmatter describes triggers, and the body is the protocol Claude follows. Customize freely; the philosophy in [`BLUEPRINT.md`](./BLUEPRINT.md) is what holds them together.
+
 ## Configuration
 
 Everything secret lives in `config.js` (gitignored). `config.example.js` shows the shape:

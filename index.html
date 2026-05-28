@@ -2971,7 +2971,7 @@ const CAT_EMOJI = {
   'Entertainment & Nightlife':'🍸','Shopping & Clothing':'🛍️',
   'Health & Supplements':'💊','Personal Care':'✂️',
   'Fees & Interest':'📊','Transfers & Payments':'💸',
-  'SocialLoop Revenue':'🔄','Memberships':'🎫','Insurance':'🛡️',
+  'Business Revenue':'🔄','Memberships':'🎫','Insurance':'🛡️',
   'Apple Services':'🍎','Amazon':'📦','Google Services':'🔍','Other':'💳'
 };
 
@@ -2982,7 +2982,7 @@ const CAT_COLOR = {
   'Entertainment & Nightlife':'#f0abfc','Shopping & Clothing':'#14b8a6',
   'Health & Supplements':'#6ee7b7','Personal Care':'#f472b6',
   'Fees & Interest':'#fca5a5','Transfers & Payments':'#71717a',
-  'SocialLoop Revenue':'#6ee7b7','Memberships':'#fde68a',
+  'Business Revenue':'#6ee7b7','Memberships':'#fde68a',
   'Insurance':'#93c5fd','Apple Services':'#a1a1ab','Amazon':'#fde68a',
   'Google Services':'#93c5fd','Other':'#475569'
 };
@@ -3482,7 +3482,7 @@ function finRenderHero() {
     .reduce((s, tx) => s + Math.abs(parseFloat(tx.amount)), 0);
 
   // Burn rate — real spending only, 3-month average, no CC payments or transfers
-  const BURN_EXCLUDE_CATS = ['Bank Transfer','Credit Card Payment','Income/Deposit','ATM/Cash','SocialLoop Revenue','Transfers & Payments'];
+  const BURN_EXCLUDE_CATS = ['Bank Transfer','Credit Card Payment','Income/Deposit','ATM/Cash','Business Revenue','Transfers & Payments'];
   const BURN_EXCLUDE_NAMES = ['american express','amex ach','amex retry','payment thank you','online transfer to','online transfer from','zelle payment to','venmo payment','discover e-payment','bank of america credit card','mobile payment','withdrawal','check #','quickpay with zelle'];
   const burnTx = finAllTx.filter(tx => {
     if (BURN_EXCLUDE_CATS.includes(tx.ai_category)) return false;
@@ -3709,7 +3709,7 @@ function finRenderAccounts() {
 function finRenderSpendingChart() {
   const chartEl = document.getElementById('fin-burn-chart');
   const catEl = document.getElementById('fin-cat-breakdown');
-  const EXCLUDE_CATS = ['Bank Transfer','Credit Card Payment','Income/Deposit','ATM/Cash','SocialLoop Revenue','Transfers & Payments'];
+  const EXCLUDE_CATS = ['Bank Transfer','Credit Card Payment','Income/Deposit','ATM/Cash','Business Revenue','Transfers & Payments'];
   const EXCLUDE_NAMES = ['american express','amex ach','amex retry','payment thank you','online transfer to','online transfer from','zelle payment to','venmo payment','discover e-payment','bank of america credit card','mobile payment','withdrawal','check #','quickpay with zelle'];
 
   // Show everything EXCEPT known transfers/payments
@@ -6390,7 +6390,7 @@ function pjCardHtml(p) {
 }
 
 function pjSortByImportance(projects) {
-  const pins = ['socialloop','finances','taxes'];
+  const pins = [];
   const pinned = new Array(pins.length).fill(null);
   const rest = [];
   for (const p of projects) {
