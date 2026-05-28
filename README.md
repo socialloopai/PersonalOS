@@ -21,7 +21,7 @@ npx teeny dev --local
 
 **Blitz.dev project on Cloudflare** (persistent on the cloud accessible from your phone)
 
-Blitz spins up a Cloudflare backend for your fork. You get a `<slug>.app.blitz.dev` URL with its own SQLite database, file storage, and auth, free to claim with a Google login.
+Blitz is just Cloudflare, provisioned for you. Each fork gets its own Worker, SQLite database (D1), file storage (R2), and `<slug>.app.blitz.dev` URL. Free to claim with a Google login.
 
 Paste into Claude Code:
 
