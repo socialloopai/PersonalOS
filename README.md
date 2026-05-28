@@ -55,12 +55,4 @@ The original shipped 7 skills (add-project, add-task, add-habit, snapshot, debri
 
 See `skills/TEENYBASE-API.md` for the auth + query cheat sheet.
 
-## Caveats
-
-Pre-alpha. JWT signature verification is stubbed for tier-1 local (decodes payload only, marked TODO in the code). The Postgres-specific SQL in some skills (mainly `AT TIME ZONE`) is documented as "compute TZ math client-side" in the cheat sheet, the agent adapts at runtime.
-
-## Credits
-
-Original [PersonalOS](https://github.com/socialloopai/PersonalOS) by [@socialloopai](https://github.com/socialloopai). I ported the backend so anyone can spin up a copy on Cloudflare in under a minute. Honestly the seed flow is the only reason I sat down to do this.
-
 [MIT](./LICENSE)
