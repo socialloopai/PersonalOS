@@ -1,0 +1,20 @@
+# Local config — contains Supabase keys
+config.js
+
+# Environment
+.env
+.env.*
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Node (if you ever add tooling)
+node_modules/
+dist/
