@@ -1,5 +1,7 @@
 # PersonalOS
 
+![PersonalOS dashboard](assets/banner.png)
+
 PersonalOS keeps everything you'd otherwise lose track of in one database: bank transactions, legal cases, business entity docs, taxes, sleep score, habits, journal. Claude can answer "what did I spend on coffee in 2022" because it's all in one place.
 
 Live demo at **https://personal-os.app.blitz.dev**. No signup, you land on Alex's seeded dashboard: 2 projects, 7 transactions, an I-140 case, two LLCs, an Oura day, a coffee habit on a 3-day streak. Try `/ask?q=coffee`.
