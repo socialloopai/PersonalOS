@@ -21,13 +21,13 @@ npx teeny dev --local
 
 **Blitz.dev project on Cloudflare** (persistent on the cloud accessible from your phone)
 
+Blitz spins up a Cloudflare backend for your fork. You get a `<slug>.app.blitz.dev` URL with its own SQLite database, file storage, and auth, free to claim with a Google login.
+
 Paste into Claude Code:
 
 ```
 Install the blitz skill (`npx -y @blitzdev/skill install`), clone github.com/socialloopai/PersonalOS and deploy it to a new Blitz project running on Cloudflare.
 ```
-
-You get your own URL with a fresh database, claimed under your Google account.
 
 **Self-hosted on Cloudflare**
 
